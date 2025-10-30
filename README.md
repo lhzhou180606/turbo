@@ -203,20 +203,41 @@ JDK 1.8 支持的最后版本是 1.2.0 版本，后续版本除非出现重大 b
 ```
 
 ### JDK 21 版本
-从 1.3.0 版本开始，JDK 21 默认支持，并且会持续进行更新。
+从 1.3.0 版本开始，JDK 21 默认支持，并且会持续进行更新（包括修复 bug、新增功能），目前 1.3.0 版本还未发 Maven 仓库，因此需要手动安装到本地仓库，等后续版本发布后，就可以直接从 Maven 仓库引入。
 ```
 <dependency>
   <groupId>com.didiglobal.turbo</groupId>
-  <artifactId>demo</artifactId>
-  <version>1.2.0</version>
+  <artifactId>engine</artifactId>
+  <version>1.3.0</version>
 </dependency>
 ```
+然后在升级到 JDK 21 版本的时候，除了升级 JDK 版本，还需要升级依赖版本，并且打开一些开关配置，首先是循环依赖，由于 Spring 2.7.x 之后不再推荐循环依赖，因此需要手动进行开启。
+如果是 application.properties，则配置成以下形式
+
+```
+spring.main.allow-circular-references=true
+```
+如果是 application.yml，则配置成以下形式即可
+```
+spring:
+  main:
+    allow-circular-references: true
+```
+
+除此之外，由于 SpringBoot 3 之后的版本使用 imports 替代 spring.factories，项目中如果使用 Druid 线程池的话，需要手动进行配置。
+
+在 resource 目录中创建 META-INF.spring 目录，并创建 `org.springframework.boot.autoconfigure.AutoConfiguration.imports` 文件，内容如下：
+ ```
+ com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
+ ```
+最后便可以解决 Druid 和循环依赖问题。
+
 开发demo，非必须依赖
 ```
 <dependency>
   <groupId>com.didiglobal.turbo</groupId>
   <artifactId>demo</artifactId>
-  <version>1.2.0</version>
+  <version>1.3.0</version>
 </dependency>
 ```
 
