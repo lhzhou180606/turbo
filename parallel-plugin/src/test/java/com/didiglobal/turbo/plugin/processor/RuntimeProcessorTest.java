@@ -633,13 +633,13 @@ public class RuntimeProcessorTest extends BaseTest {
     }
 
     /**
-     *                                                                     |---> 二级ParallelFork ---> UserTask_1e0chov(1-1) --|
+     *                                                                     |---> 二级ParallelFork ---> UserTask_1e0chov(1-1) -d4-|
      *                                  |---> ExclusiveGateway_3uecfsr ----|                                                   |---> 二级ParallelJoin --|
-     *                                  |                                  |---> 二级ParallelFork ---> UserTask_0skk1nb(1-2) --|                         |
+     *                                  |                                  |---> 二级ParallelFork ---> UserTask_0skk1nb(1-2) -b2-|                         |
      *                                  |                                                                                                                |
-     *  StartEvent ---> 一级ParallelFork |---> ExclusiveGateway_30qligf ---> UserTask_1sirm1d(2) --------------------------------------------------------|---> 一级ParallelJoin ---> UserTask_21bshkk(success) ---> EndEvent
+     *  StartEvent ---> 一级ParallelFork |---> ExclusiveGateway_30qligf ---> UserTask_1sirm1d(2) -------c3-------------------------------------------------|---> 一级ParallelJoin ---> UserTask_21bshkk(success) ---> EndEvent
      *                                  |                                                                                                                |
-     *                                  |---> ExclusiveGateway_3ad9clv ---> UserTask_321tjcu(3) ---------------------------------------------------------|
+     *                                  |---> ExclusiveGateway_3ad9clv ---> UserTask_321tjcu(3) -------a1--------------------------------------------------|
      */
     @Test
     public void testNestedParallelGateway() throws Exception {
@@ -675,6 +675,7 @@ public class RuntimeProcessorTest extends BaseTest {
         commitTaskParam1.setTaskInstanceId(startProcessResult.getNodeExecuteResults().get(task321tjcuIndex).getActiveTaskInstance().getNodeInstanceId());
         commitTaskParam1.setExtendProperties(copyExtendProperties(startProcessResult.getExtendProperties(), task321tjcuIndex));
         List<InstanceData> variables1 = new ArrayList<>();
+        variables1.add(new InstanceData("a", 1));
         commitTaskParam1.setVariables(variables1);
         CommitTaskResult commitTaskResult1 = runtimeProcessor.commit(commitTaskParam1);
         Assert.assertEquals(commitTaskResult1.getErrCode(), ParallelErrorEnum.WAITING_SUSPEND.getErrNo());
@@ -686,6 +687,7 @@ public class RuntimeProcessorTest extends BaseTest {
         commitTaskParam2.setTaskInstanceId(startProcessResult.getNodeExecuteResults().get(task0skk1nbIndex).getActiveTaskInstance().getNodeInstanceId());
         commitTaskParam2.setExtendProperties(copyExtendProperties(startProcessResult.getExtendProperties(), task0skk1nbIndex));
         List<InstanceData> variables2 = new ArrayList<>();
+        variables2.add(new InstanceData("b", 2));
         commitTaskParam2.setVariables(variables2);
         CommitTaskResult commitTaskResult2 = runtimeProcessor.commit(commitTaskParam2);
         Assert.assertEquals(commitTaskResult2.getErrCode(), ParallelErrorEnum.WAITING_SUSPEND.getErrNo());
@@ -697,6 +699,7 @@ public class RuntimeProcessorTest extends BaseTest {
         commitTaskParam3.setTaskInstanceId(startProcessResult.getNodeExecuteResults().get(task1sirm1dIndex).getActiveTaskInstance().getNodeInstanceId());
         commitTaskParam3.setExtendProperties(copyExtendProperties(startProcessResult.getExtendProperties(), task1sirm1dIndex));
         List<InstanceData> variables3 = new ArrayList<>();
+        variables3.add(new InstanceData("c", 3));
         commitTaskParam3.setVariables(variables3);
         CommitTaskResult commitTaskResult3 = runtimeProcessor.commit(commitTaskParam3);
         Assert.assertEquals(commitTaskResult3.getErrCode(), ParallelErrorEnum.WAITING_SUSPEND.getErrNo());
@@ -708,6 +711,7 @@ public class RuntimeProcessorTest extends BaseTest {
         commitTaskParam4.setTaskInstanceId(startProcessResult.getNodeExecuteResults().get(task1e0chovIndex).getActiveTaskInstance().getNodeInstanceId());
         commitTaskParam4.setExtendProperties(copyExtendProperties(startProcessResult.getExtendProperties(), task1e0chovIndex));
         List<InstanceData> variables4 = new ArrayList<>();
+        variables4.add(new InstanceData("d", 4));
         commitTaskParam4.setVariables(variables4);
         CommitTaskResult commitTaskResult4 = runtimeProcessor.commit(commitTaskParam4);
         Assert.assertEquals(commitTaskResult4.getErrCode(), ErrorEnum.COMMIT_SUSPEND.getErrNo());
@@ -718,7 +722,8 @@ public class RuntimeProcessorTest extends BaseTest {
         commitTaskParam5.setFlowInstanceId(commitTaskResult4.getFlowInstanceId());
         commitTaskParam5.setTaskInstanceId(commitTaskResult4.getActiveTaskInstance().getNodeInstanceId());
         commitTaskParam5.setExtendProperties(copyExtendProperties(commitTaskResult4.getExtendProperties(), 0));
-        List<InstanceData> variables5 = new ArrayList<>();
+        List<InstanceData> variables5 = new ArrayList<>(commitTaskResult4.getVariables());
+        variables5.add(new InstanceData("e", 5));
         commitTaskParam5.setVariables(variables5);
         CommitTaskResult commitTaskResult5 = runtimeProcessor.commit(commitTaskParam5);
         Assert.assertEquals(commitTaskResult5.getErrCode(), ErrorEnum.SUCCESS.getErrNo());
